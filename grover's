@@ -1,0 +1,60 @@
+#!pip install qiskit qiskit-aer pylatexenc matplotlib
+
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_bloch_multivector
+from IPython.display import display
+
+# Oracle (marks |11⟩)
+def oracle():
+    qc = QuantumCircuit(2)
+    qc.cz(0,1)
+    return qc
+
+# Diffusion Operator
+def diffusion(n):
+    qc = QuantumCircuit(n)
+    qc.h(range(n))
+    qc.x(range(n))
+    qc.h(n-1)
+    qc.mcx(list(range(n-1)), n-1)
+    qc.h(n-1)
+    qc.x(range(n))
+    qc.h(range(n))
+    return qc
+
+# Grover Circuit
+def grover():
+    n = 2
+    qc = QuantumCircuit(n,n)
+
+    qc.h(range(n))                      # superposition
+    qc.compose(oracle(), inplace=True)
+    qc.compose(diffusion(n), inplace=True)
+
+    qc.save_statevector()               # save before measurement
+    qc.measure(range(n), range(n))
+
+    # 🔹 Circuit Diagram
+    print("Quantum Circuit:")
+    display(qc.draw(output='mpl'))
+
+    # Simulation
+    sim = AerSimulator()
+    result = sim.run(qc).result()
+
+    # Statevector
+    sv = result.get_statevector()
+    print("\nStatevector:\n", sv)
+
+    # Bloch Sphere
+    display(plot_bloch_multivector(sv))
+
+    # Measurement Results
+    counts = result.get_counts()
+    print("\nResult:", counts)
+
+    return qc
+
+# Run
+qc = grover()
