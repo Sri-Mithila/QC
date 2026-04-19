@@ -1,0 +1,116 @@
+#IDENTITY GATE
+
+!pip install qiskit qiskit_aer pylatexenc matplotlib
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(1, 1)
+qc.id(0)
+qc.measure([0], [0])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="Identity Gate Measurement Results"))
+
+----------------------------------------------------------------------------
+#HADAMARD GATE
+!pip install qiskit qiskit_aer pylatexenc matplotlib
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(1, 1)
+qc.h(0)
+qc.measure(0,0)
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="Hadamard Gate Results"))
+__________________________________________________________________________
+#PAUILI X GATE
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(1, 1)
+
+qc.x(0)
+qc.measure([0], [0])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="Pauli-X Gate Results"))
+_____________________________________________________________________________
+#T GATE
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(1, 1)
+qc.t(0)
+qc.measure([0], [0])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="T Gate Results"))
+_________________________________________________________________________________
+# PHASE GATE
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(1, 1)
+qc.s(0)
+qc.measure([0], [0])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="Phase (S) Gate Results"))
+_____________________________________________________________________________________
+# Multi qubit SWAP Gate
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+
+qc = QuantumCircuit(2, 2)
+qc.x(0)
+qc.swap(0, 1)
+qc.measure([0, 1], [0, 1])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="SWAP Gate Results"))
