@@ -1,0 +1,57 @@
+%matplotlib inline
+
+!pip install qiskit pylatexenc qiskit-aer
+
+import numpy as np
+import matplotlib.pyplot as plt
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit.visualization import plot_bloch_multivector
+from qiskit_aer import AerSimulator
+from IPython.display import display
+
+n = 3
+
+# Oracle selection
+oracleType, oracleValue = np.random.randint(2), np.random.randint(2)
+if oracleType == 0:
+    print("The oracle returns a constant value", oracleValue)
+else:
+    print("The oracle returns a balanced function")
+    a = np.random.randint(1, 2**n)
+
+# Circuit
+qr, cr = QuantumRegister(n+1), ClassicalRegister(n)
+qc = QuantumCircuit(qr, cr)
+
+# Superposition + ancilla prep
+qc.h(range(n))
+qc.x(qr[n])
+qc.h(qr[n])
+qc.barrier()
+
+# Oracle
+if oracleType == 0:
+    if oracleValue == 1: qc.x(qr[n])
+else:
+    for i in range(n):
+        if (a >> i) & 1: qc.cx(qr[i], qr[n])
+
+qc.barrier()
+
+# Final Hadamard + Measurement
+qc.h(range(n))
+qc.measure(range(n), range(n))
+
+# Draw
+display(qc.draw('mpl', scale=0.5))
+
+# Simulation
+sim = AerSimulator()
+qc.save_statevector()
+result = sim.run(qc).result()
+
+sv = result.get_statevector()
+print("Statevector:\n", sv)
+
+# Bloch sphere
+plot_bloch_multivector(sv)
