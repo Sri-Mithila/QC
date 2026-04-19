@@ -1,0 +1,118 @@
+# Install once (if needed)
+!pip install qiskit qiskit_aer matplotlib
+
+from qiskit import transpile
+from qiskit_aer import AerSimulator
+from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+import math
+
+# Controlled multiplication mod 15
+def circuit_amod15(qc, qr, cr, a):
+    if a == 2:
+        qc.cswap(qr[4], qr[3], qr[2])
+        qc.cswap(qr[4], qr[2], qr[1])
+        qc.cswap(qr[4], qr[1], qr[0])
+
+    elif a == 7:
+        qc.cswap(qr[4], qr[1], qr[0])
+        qc.cswap(qr[4], qr[2], qr[1])
+        qc.cswap(qr[4], qr[3], qr[2])
+        qc.cx(qr[4], qr[3])
+        qc.cx(qr[4], qr[2])
+        qc.cx(qr[4], qr[1])
+        qc.cx(qr[4], qr[0])
+
+    elif a == 8:
+        qc.cswap(qr[4], qr[1], qr[0])
+        qc.cswap(qr[4], qr[2], qr[1])
+        qc.cswap(qr[4], qr[3], qr[2])
+
+    elif a == 11:
+        qc.cswap(qr[4], qr[2], qr[0])
+        qc.cswap(qr[4], qr[3], qr[1])
+        qc.cx(qr[4], qr[3])
+        qc.cx(qr[4], qr[2])
+        qc.cx(qr[4], qr[1])
+        qc.cx(qr[4], qr[0])
+
+    elif a == 13:
+        qc.cswap(qr[4], qr[3], qr[2])
+        qc.cswap(qr[4], qr[2], qr[1])
+        qc.cswap(qr[4], qr[1], qr[0])
+        qc.cx(qr[4], qr[3])
+        qc.cx(qr[4], qr[2])
+        qc.cx(qr[4], qr[1])
+        qc.cx(qr[4], qr[0])
+
+
+def circuit_aperiod15(qc, qr, cr, a):
+
+    # Initialize |1>
+    qc.x(qr[0])
+
+    # ---- Step 1 ----
+    qc.h(qr[4])
+    qc.h(qr[4])  # controlled identity
+
+    qc.measure(qr[4], cr[0])
+    qc.reset(qr[4])
+
+    # ---- Step 2 ----
+    qc.h(qr[4])
+    qc.cx(qr[4], qr[2])
+    qc.cx(qr[4], qr[0])
+
+    # Feed forward (modern)
+    with qc.if_test((cr, 1)):
+        qc.p(math.pi / 2, qr[4])
+
+    qc.h(qr[4])
+
+    qc.measure(qr[4], cr[1])
+    qc.reset(qr[4])
+
+    # ---- Step 3 ----
+    qc.h(qr[4])
+    circuit_amod15(qc, qr, cr, a)
+
+    # Feed forward (modern)
+    with qc.if_test((cr, 3)):
+        qc.p(3 * math.pi / 4, qr[4])
+
+    with qc.if_test((cr, 2)):
+        qc.p(math.pi / 2, qr[4])
+
+    with qc.if_test((cr, 1)):
+        qc.p(math.pi / 4, qr[4])
+
+    qc.h(qr[4])
+
+    qc.measure(qr[4], cr[2])
+
+
+# Registers
+q = QuantumRegister(5, 'q')
+c = ClassicalRegister(5, 'c')
+
+# Circuit
+shor = QuantumCircuit(q, c)
+
+# Run algorithm
+circuit_aperiod15(shor, q, c, 7)
+
+# Draw circuit
+display(shor.draw(output='mpl'))
+
+# Simulate
+backend = AerSimulator()
+job = backend.run(shor, shots=1024)
+result = job.result()
+
+counts = result.get_counts()
+
+print("Measurement Results:", counts)
+
+# Plot histogram
+display(plot_histogram(counts))
