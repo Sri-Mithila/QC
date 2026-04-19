@@ -1,0 +1,19 @@
+!pip install qiskit qiskit_aer pylatexenc matplotlib
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_histogram
+import matplotlib.pyplot as plt
+from IPython.display import display
+qc = QuantumCircuit(2, 2)
+
+qc.h(0)
+qc.cx(0, 1)
+qc.measure([0, 1], [0, 1])
+simulator = AerSimulator()
+job = simulator.run(qc, shots=1024)
+result = job.result()
+print("Quantum Circuit:")
+display(qc.draw(output='mpl'))
+counts = result.get_counts()
+print("\nMeasurement Results:", counts)
+display(plot_histogram(counts, title="CNOT Gate Results"))
