@@ -1,0 +1,48 @@
+#!pip install qiskit qiskit-aer pylatexenc matplotlib
+
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_bloch_multivector
+from IPython.display import display
+
+# Oracle (hidden string s = 11)
+def simon_oracle():
+    qc = QuantumCircuit(4)
+    qc.cx(0,2); qc.cx(1,3)   # copy input
+    qc.cx(0,3); qc.cx(1,2)   # apply hidden string
+    return qc
+
+# Simon Circuit
+def simon():
+    qc = QuantumCircuit(4,2)
+
+    qc.h([0,1])                          # superposition
+    qc.compose(simon_oracle(), inplace=True)
+    qc.h([0,1])                          # interference
+
+    qc.save_statevector()                # save before measurement
+    qc.measure([0,1],[0,1])
+
+    # 🔹 Circuit Diagram
+    print("Quantum Circuit:")
+    display(qc.draw(output='mpl'))
+
+    # Simulation
+    sim = AerSimulator()
+    result = sim.run(qc).result()
+
+    # Statevector
+    sv = result.get_statevector()
+    print("\nStatevector:\n", sv)
+
+    # Bloch Sphere
+    display(plot_bloch_multivector(sv))
+
+    # Measurement
+    counts = result.get_counts()
+    print("\nMeasurement Results:", counts)
+
+    return qc
+
+# Run
+qc = simon()
