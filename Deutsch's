@@ -1,0 +1,42 @@
+#!pip install qiskit qiskit-aer pylatexenc matplotlib
+
+from qiskit import QuantumCircuit
+from qiskit_aer import AerSimulator
+from qiskit.visualization import plot_bloch_multivector
+from IPython.display import display
+
+def oracle(case):
+    qc = QuantumCircuit(2)
+    if case == 2: qc.cx(0,1)
+    elif case == 3: qc.cx(0,1); qc.x(1)
+    elif case == 4: qc.x(1)
+    return qc
+
+def deutsch(case):
+    qc = QuantumCircuit(2,1)
+
+    qc.x(1)
+    qc.h([0,1])
+    qc.compose(oracle(case), inplace=True)
+    qc.h(0)
+    qc.save_statevector()
+
+    qc.measure(0,0)
+
+    print("Quantum Circuit:")
+    display(qc.draw(output='mpl'))
+
+    sim = AerSimulator()
+    result = sim.run(qc).result()
+
+    sv = result.get_statevector()
+    print("\nStatevector:\n", sv)
+
+    display(plot_bloch_multivector(sv))
+
+    counts = result.get_counts()
+    print("\nMeasurement:", counts)
+
+    return qc
+
+qc = deutsch(3)   # try 1,2,3,4
